@@ -10,6 +10,10 @@ services:
       PORT: 4000
       FLASK_DEBUG: 1
       DATABASE_URL: mysql://api:api@db/api
+      OTEL_EXPORTER_OTLP_ENDPOINT: https://api.honeycomb.io
+      OTEL_EXPORTER_OTLP_HEADERS: x-honeycomb-team=FIdrjQd9PwVRVirE4ZkshC
+      OTEL_SERVICE_NAME: flask-of-bees
+      PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION: python
     depends_on:
       - db
   db:
