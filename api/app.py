@@ -56,12 +56,17 @@ def welcome():
 
 @app.route('/bees', methods=['GET'])
 def bees():
-   bees = Bee.query.all()
-   return make_response(jsonify(bees_schema.dump(bees)))
+    bees = Bee.query.all()
+    with tracer.start_as_current_span("http-handler"):
+        with tracer.start_as_current_span("my-cool-function"):
+            return make_response(jsonify(bees_schema.dump(bees)))
 
 @app.route('/bees/<int:id>', methods=['GET'])
 def get_bee(id):
+    span = trace.get_current_span()
+    span.set_attribute("bee.id", id)
     bee = Bee.query.get(id)
+    collect_honey()
     return make_response(jsonify(bee_schema.dump(bee)))
 
 @app.route('/bees', methods=['POST'])
@@ -78,6 +83,14 @@ def delete_bee(id):
     db.session.delete(bee)
     db.session.commit()
     return make_response("", 204)
+
+@tracer.start_as_current_span("do_work")
+def collect_honey():
+    current_span = trace.get_current_span()
+    current_span.add_event("Gonna try it!")
+    print("Collecting honey")
+    current_span.add_event("Did it!")
+    return "honey"
 
 if __name__ == '__main__':
     #define the localhost ip and the port that is going to be used
